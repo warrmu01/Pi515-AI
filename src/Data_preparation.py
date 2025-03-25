@@ -9,16 +9,53 @@ from sklearn.impute import KNNImputer
 
 def load_fish_data():
     """
-    Loads fish data from a specified local Excel file
+    Loads fish data from a specified local Excel file and performs feature engineering.
 
     Returns:
-    pd.DataFrame: DataFrame containing the fish data.
+        pd.DataFrame: Preprocessed DataFrame.
     """
-    # Determine file type and read accordingly
-    #abdullahs test
-    
-    df = pd.read_excel("../Data/Raw/Main_Data_edited.xlsx")  # Specify the sheet
 
+    def get_season(month):
+        if month in [12, 1, 2]:
+            return "Winter"
+        elif month in [3, 4, 5]:
+            return "Spring"
+        elif month in [6, 7, 8]:
+            return "Summer"
+        else:
+            return "Fall"
+
+    df = pd.read_excel("../Data/Raw/Main_Data_edited.xlsx")
+
+    # ✅ Convert dates and sort
+    df["Date"] = pd.to_datetime(df["Date"])
+    df = df.sort_values("Date")  # required for lag and rolling
+
+    # ✅ Feature Engineering
+    df["Season"] = df["Month"].apply(get_season)
+    df["Temp x Rain"] = df["Spring Temp (F)"] * df["Dec Rain"]
+    df["Max Air Temp x Calmar Rain"] = df["Max air temp"] * df["Calmar Rain"]
+    # df["Max Air Temp x Dec Rain"] = df["Max air temp"] * df["Dec Rain"]
+    # df["Total Rain"] = df["Dec Rain"] + df["Calmar Rain"]
+
+    df["Day of Year"] = df["Date"].dt.dayofyear
+
+    # ✅ Convert to numeric
+    df["Year class"] = pd.to_numeric(df["Year class"], errors="coerce")
+    df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
+    df["Fish Age"] = df["Year"] - df["Year class"]
+
+    # ✅ Lag Features (1, 3, 7 days)
+    lag_features = [
+        "Spring Temp (F)", "AM Transparency", "PM Transparency", "Dec Rain", "Calmar Rain"
+    ]
+    for col in lag_features:
+        for lag in [3]:
+            df[f"{col} (Lag {lag})"] = df[col].shift(lag)
+
+    # ✅ 7-day Rolling Averages
+    for col in ["Spring Temp (F)", "AM Transparency", "PM Transparency", "Dec Rain", "Calmar Rain"]:
+        df[f"{col} 7-day avg"] = df[col].rolling(window=10, min_periods=1).mean()
 
     return df
 
@@ -27,26 +64,29 @@ def create_fish_pipeline():
     """
     Creates a preprocessing pipeline for fish hatchery data.
     """
+    # Numerical features including lag and rolling averages
     numerical_features = [
-        "Spring Temp (F)", "Max air temp",
-        "Min air temp", "Dec Rain", "Calmar Rain", "# fish", "Fish Alive"
+        "Spring Temp (F)", "Max air temp", "Min air temp", "Dec Rain", "Calmar Rain",
+        "# fish", "Temp x Rain", "Max Air Temp x Calmar Rain", 
+        "Day of Year", "Fish Age",
+        # Lag features
+        "Spring Temp (F) (Lag 3)",
+        "AM Transparency (Lag 3)", 
+        "PM Transparency (Lag 3)", 
+        "Dec Rain (Lag 3)", 
+        "Calmar Rain (Lag 3)", 
+        # 7-day rolling averages
+        "Spring Temp (F) 7-day avg", "AM Transparency 7-day avg", "PM Transparency 7-day avg",
+        "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
     ]
 
-    morts_feature = ["Morts"]  # Handle separately
-
-
     transparency_features = ["AM Transparency", "PM Transparency"]
-    categorical_features = ["Strain", "Lot", "Raceway", "AM Feed", "PM Feed"]
+
+    categorical_features = ["AM Feed", "PM Feed", "Season"]
 
     # Numeric transformer
     num_transformer = Pipeline(steps=[
         ("imputer", SimpleImputer(strategy="median")),
-        ("scaler", StandardScaler())
-    ])
-
-    # Morts transformer (fill with 0)
-    morts_transformer = Pipeline(steps=[
-        ("imputer", SimpleImputer(strategy="constant", fill_value=0)),
         ("scaler", StandardScaler())
     ])
 
@@ -62,25 +102,40 @@ def create_fish_pipeline():
     ])
 
     preprocessor = ColumnTransformer(transformers=[
-        ("morts", morts_transformer, morts_feature),
         ("num", num_transformer, numerical_features),
         ("transparency", transparency_transformer, transparency_features),
         ("cat", cat_transformer, categorical_features),
     ])
 
-    # Final pipeline
     pipeline = Pipeline(steps=[("preprocessor", preprocessor)])
-
     return pipeline
-
 
 def split_fish_data(df, ratios):
     """
     Splits fish data into training, dev, and test sets.
+    Assumes engineered features like 'Season', 'Temp x Rain' already exist in the DataFrame.
     """
     df = df.sample(frac=1, random_state=42)
 
-    selected_features = ["Date", "Month","Day", "Year", "AM Feed", "AM Transparency", "PM Feed", "PM Transparency", "Spring Temp (F)", "Morts", "# fish", "Dec Rain", "Max air temp", "Min air temp", "Calmar Rain", "Strain", "Lot", "Sub Lot", "Raceway", "Fish Alive", "Fish survival rate"]
+
+    selected_features = [
+        "AM Feed", "AM Transparency", "PM Feed", "PM Transparency",
+        "Spring Temp (F)", "# fish", "Dec Rain", "Max air temp", "Min air temp", "Calmar Rain",
+        "Season", "Temp x Rain", "Max Air Temp x Calmar Rain",
+        "Day of Year", "Fish Age",
+        # Lag features
+        "Spring Temp (F) (Lag 3)",
+        "AM Transparency (Lag 3)", 
+        "PM Transparency (Lag 3)", 
+        "Dec Rain (Lag 3)", 
+        "Calmar Rain (Lag 3)", 
+        # Rolling averages
+        "Spring Temp (F) 7-day avg", "AM Transparency 7-day avg", "PM Transparency 7-day avg",
+        "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
+    ]
+
+    # Drop early rows with NaNs from lag/rolling
+    df = df.dropna(subset=selected_features + ["Fish survival rate"])
 
     X = df[selected_features]
     y = df["Fish survival rate"]
