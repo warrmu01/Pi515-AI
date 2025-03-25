@@ -57,6 +57,7 @@ def load_fish_data():
     for col in ["Spring Temp (F)", "AM Transparency", "PM Transparency", "Dec Rain", "Calmar Rain"]:
         df[f"{col} 7-day avg"] = df[col].rolling(window=10, min_periods=1).mean()
 
+
     return df
 
 
