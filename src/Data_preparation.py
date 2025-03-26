@@ -31,12 +31,19 @@ def load_fish_data():
     df["Date"] = pd.to_datetime(df["Date"])
     df = df.sort_values("Date")  # required for lag and rolling
 
+    df["AM Feed"] = df["AM Feed"].fillna("X")
+    df["PM Feed"] = df["PM Feed"].fillna("X")
+
+    # 🧠 KNN Imputation for Transparency Columns
+    transparency_cols = ["AM Transparency", "PM Transparency"]
+    knn_imputer = KNNImputer(n_neighbors=10)
+    df[transparency_cols] = knn_imputer.fit_transform(df[transparency_cols])
+
     # ✅ Feature Engineering
     df["Season"] = df["Month"].apply(get_season)
-    df["Temp x Rain"] = df["Spring Temp (F)"] * df["Dec Rain"]
-    df["Max Air Temp x Calmar Rain"] = df["Max air temp"] * df["Calmar Rain"]
-    # df["Max Air Temp x Dec Rain"] = df["Max air temp"] * df["Dec Rain"]
-    # df["Total Rain"] = df["Dec Rain"] + df["Calmar Rain"]
+    df["Spring_Temp x Rain"] = df["Spring Temp (F)"] * (df["Dec Rain"] + df["Calmar Rain"])
+    df["Max Air Temp x Rain"] = df["Max air temp"] * (df["Dec Rain"] + df["Calmar Rain"])
+    df["Total Rain"] = df["Dec Rain"] + df["Calmar Rain"]
 
     df["Day of Year"] = df["Date"].dt.dayofyear
 
@@ -55,7 +62,7 @@ def load_fish_data():
 
     # ✅ 7-day Rolling Averages
     for col in ["Spring Temp (F)", "AM Transparency", "PM Transparency", "Dec Rain", "Calmar Rain"]:
-        df[f"{col} 7-day avg"] = df[col].rolling(window=10, min_periods=1).mean()
+        df[f"{col} 7-day avg"] = df[col].rolling(window=7, min_periods=7).mean()
 
 
     return df
@@ -64,51 +71,48 @@ def load_fish_data():
 def create_fish_pipeline():
     """
     Creates a preprocessing pipeline for fish hatchery data.
+    Now assumes transparency features are already imputed in load_fish_data().
     """
-    # Numerical features including lag and rolling averages
+
+    # All numerical features including lag & rolling features
     numerical_features = [
         "Spring Temp (F)", "Max air temp", "Min air temp", "Dec Rain", "Calmar Rain",
-        "# fish", "Temp x Rain", "Max Air Temp x Calmar Rain", 
+        "# fish", "Spring_Temp x Rain", "Max Air Temp x Rain", 
         "Day of Year", "Fish Age",
         # Lag features
-        "Spring Temp (F) (Lag 3)",
-        "AM Transparency (Lag 3)", 
-        "PM Transparency (Lag 3)", 
-        "Dec Rain (Lag 3)", 
-        "Calmar Rain (Lag 3)", 
-        # 7-day rolling averages
+        "Spring Temp (F) (Lag 3)", "AM Transparency (Lag 3)", "PM Transparency (Lag 3)", 
+        "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)",
+        # Rolling averages
         "Spring Temp (F) 7-day avg", "AM Transparency 7-day avg", "PM Transparency 7-day avg",
-        "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
+        "Dec Rain 7-day avg", "Calmar Rain 7-day avg",
+        # Direct transparency features (now clean!)
+        "AM Transparency", "PM Transparency"
     ]
 
-    transparency_features = ["AM Transparency", "PM Transparency"]
-
+    # Categorical features
     categorical_features = ["AM Feed", "PM Feed", "Season"]
 
-    # Numeric transformer
+    # Transformer for numeric features
     num_transformer = Pipeline(steps=[
-        ("imputer", SimpleImputer(strategy="median")),
+        ("imputer", SimpleImputer(strategy="median")),  # Fallback imputation for any leftover NaNs
         ("scaler", StandardScaler())
     ])
 
-    # KNN imputation for transparency columns
-    transparency_transformer = Pipeline(steps=[
-        ("imputer", KNNImputer(n_neighbors=5))
-    ])
-
-    # Categorical transformer
+    # Optional: Add back categorical pipeline if needed
     cat_transformer = Pipeline(steps=[
-        ("imputer", SimpleImputer(strategy="most_frequent")),
         ("onehot", OneHotEncoder(handle_unknown="ignore"))
     ])
 
+    # Combine all preprocessing
     preprocessor = ColumnTransformer(transformers=[
         ("num", num_transformer, numerical_features),
-        ("transparency", transparency_transformer, transparency_features),
-        ("cat", cat_transformer, categorical_features),
+        ("cat", cat_transformer, categorical_features),  # if using categories
     ])
 
-    pipeline = Pipeline(steps=[("preprocessor", preprocessor)])
+    pipeline = Pipeline(steps=[
+        ("preprocessor", preprocessor)
+    ])
+
     return pipeline
 
 def split_fish_data(df, ratios):
@@ -122,7 +126,7 @@ def split_fish_data(df, ratios):
     selected_features = [
         "AM Feed", "AM Transparency", "PM Feed", "PM Transparency",
         "Spring Temp (F)", "# fish", "Dec Rain", "Max air temp", "Min air temp", "Calmar Rain",
-        "Season", "Temp x Rain", "Max Air Temp x Calmar Rain",
+        "Season", "Spring_Temp x Rain", "Max Air Temp x Rain", "Total Rain",
         "Day of Year", "Fish Age",
         # Lag features
         "Spring Temp (F) (Lag 3)",
@@ -141,20 +145,33 @@ def split_fish_data(df, ratios):
     X = df[selected_features]
     y = df["Fish survival rate"]
 
+    X = df[selected_features]
+    y = df["Fish survival rate"]
+
     dev_ratio, test_ratio = ratios
-    dev_size = int(dev_ratio * len(X))
-    test_size = int(test_ratio * len(X))
+    total_len = len(X)
+    dev_size = int(dev_ratio * total_len)
+    test_size = int(test_ratio * total_len)
 
-    X_train = X[:-(dev_size + test_size)]
-    y_train = y[:-(dev_size + test_size)]
+    if dev_size > 0:
+        X_train = X[:-(dev_size + test_size)]
+        y_train = y[:-(dev_size + test_size)]
 
-    X_dev = X[-(dev_size + test_size):-test_size]
-    y_dev = y[-(dev_size + test_size):-test_size]
+        X_dev = X[-(dev_size + test_size):-test_size]
+        y_dev = y[-(dev_size + test_size):-test_size]
 
-    X_test = X[-test_size:]
-    y_test = y[-test_size:]
+        X_test = X[-test_size:]
+        y_test = y[-test_size:]
 
-    return X_train, X_dev, X_test, y_train, y_dev, y_test
+        return X_train, X_dev, X_test, y_train, y_dev, y_test
+    else:
+        X_train = X[:-test_size]
+        y_train = y[:-test_size]
+
+        X_test = X[-test_size:]
+        y_test = y[-test_size:]
+
+        return X_train, X_test, y_train, y_test
 
 def prepare_fish_data(ratios):
     fish_data = load_fish_data()
