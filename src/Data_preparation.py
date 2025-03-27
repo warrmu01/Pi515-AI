@@ -153,25 +153,17 @@ def split_fish_data(df, ratios):
     dev_size = int(dev_ratio * total_len)
     test_size = int(test_ratio * total_len)
 
-    if dev_size > 0:
-        X_train = X[:-(dev_size + test_size)]
-        y_train = y[:-(dev_size + test_size)]
+    X_train = X[:-(dev_size + test_size)]
+    y_train = y[:-(dev_size + test_size)]
 
-        X_dev = X[-(dev_size + test_size):-test_size]
-        y_dev = y[-(dev_size + test_size):-test_size]
+    X_dev = X[-(dev_size + test_size):-test_size]
+    y_dev = y[-(dev_size + test_size):-test_size]
 
-        X_test = X[-test_size:]
-        y_test = y[-test_size:]
+    X_test = X[-test_size:]
+    y_test = y[-test_size:]
 
-        return X_train, X_dev, X_test, y_train, y_dev, y_test
-    else:
-        X_train = X[:-test_size]
-        y_train = y[:-test_size]
+    return X_train, X_dev, X_test, y_train, y_dev, y_test
 
-        X_test = X[-test_size:]
-        y_test = y[-test_size:]
-
-        return X_train, X_test, y_train, y_test
 
 def prepare_fish_data(ratios):
     fish_data = load_fish_data()
