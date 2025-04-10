@@ -10,12 +10,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize Litepicker
   const picker = new Litepicker({
     element: dateRangePickerInput,
-    singleMode: false, // Enable range selection
+    singleMode: false, // Range mode
     numberOfMonths: 2,
     numberOfColumns: 2,
     format: "YYYY-MM-DD",
-    tooltipText: { one: "day", other: "days" },
-    tooltipNumber: (totalDays) => totalDays - 1,
   });
 
   predictButton.addEventListener("click", function () {

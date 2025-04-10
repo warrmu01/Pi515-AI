@@ -1,53 +1,67 @@
-/* Freshwater Cascade Theme for Predict Page */
+/* 🌊 Freshwater Cascade Updated Theme */
 
-/* Global Styles */
+/* Global Background */
 body {
-  /* Gradient from pale blue (#E0F7FA) to soft mint (#B2EBF2) */
   background: linear-gradient(to right, #e0f7fa, #b2ebf2) !important;
-  color: #333; /* Dark text for clarity */
+  color: #333;
   font-family: "Helvetica World", sans-serif;
   min-height: 100vh;
-  margin: 0;
-  padding: 0;
 }
 
-/* (Optional) Override link styles if needed */
+/* Back to Home Button */
 .link-light {
   color: #333 !important;
 }
 
-/* Predict Card styling: white background with rounded corners and shadow */
-.predict-card {
-  background: white;
+/* Prediction Bar */
+.predict-bar {
+  background-color: white;
   border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  margin: 2rem auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  max-width: 900px;
+  width: 100%;
 }
 
-/* Predict Input styling: rounded input */
+/* Inputs Styling */
 .predict-input {
-  border-radius: 999px;
-  padding: 0.5rem 1rem;
-  border: 1px solid #ccc;
+  border: 2px solid #dee2e6;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background-color: #f9f9f9;
+  height: 52px;
+  padding: 0 20px;
+  min-width: 160px;
+  flex: 1 1 0;
+  text-align: center;
+  cursor: pointer;
+}
+
+.predict-input:hover,
+.predict-input:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
   outline: none;
 }
 
-/* Predict Button styling: 
-     Normal state – transparent with dark border and dark text.
-     On hover – fills dark (#333) and text changes to pale blue (#E0F7FA) */
+/* Predict Button (Outline Style) */
 .predict-btn {
   background-color: transparent;
-  border: 1px solid #333;
+  border: 2px solid #333;
   color: #333;
-  padding: 0.5rem 1.5rem;
-  border-radius: 999px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 30px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  font-weight: 600;
   transition: background-color 0.3s ease, color 0.3s ease;
+  height: 52px;
+  flex: 1 1 0;
+  min-width: 160px;
 }
 
 .predict-btn:hover {
@@ -56,33 +70,16 @@ body {
 }
 
 .predict-btn svg {
-  width: 1rem;
-  height: 1rem;
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
-/* Prediction Result Card styling:
-   /* Optional fine-tuning */
-.form-label {
-  font-weight: 600;
-}
-.date-group {
-  width: 250px; /* Control date picker width */
-}
-/* Make the date range picker match the site theme */
-#date-range-picker {
-  border: 2px solid #ced4da;
-  border-radius: 50px; /* Make it pill-shaped like the button */
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  text-align: center;
-  transition: all 0.3s ease;
-  background-color: #ffffff;
-  box-shadow: none;
-}
-
-#date-range-picker:hover,
-#date-range-picker:focus {
-  border-color: #333; /* Bootstrap primary color on hover/focus */
-  outline: none;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25); /* Soft blue glow */
+/* Prediction Result Card */
+.predict-result-card {
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+  max-width: 900px;
+  width: 100%;
 }
