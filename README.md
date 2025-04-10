@@ -59,7 +59,6 @@ In our evaluation, we emphasize **RMSE (Root Mean Squared Error)** and **MAPE (M
 
 > ✅ A low RMSE and MAPE indicate that the predictions are accurate and consistent, even when R² may not reflect this due to the lack of target variance.
 
-#
 
 ## 📊 Model Performance Summary
 
