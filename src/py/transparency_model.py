@@ -10,7 +10,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 
-from data_preparation.Transparency_data_preparation import create_transparency_pipeline, prepare_am_transparency_data, prepare_pm_transparency_data
+from Data_Preparation.Transparency_data_preparation import create_transparency_pipeline, prepare_am_transparency_data, prepare_pm_transparency_data
 
 def evaluate_xgb(X_train, y_train, X_dev, y_dev):
     print("Evaluating XGBoost Regressor...")
