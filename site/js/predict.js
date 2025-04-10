@@ -1,43 +1,46 @@
-$(document).ready(function () {
-  // (Optional) If you want to use jQuery UI datepicker instead of the native date input,
-  // uncomment the following line:
-  // $("#predict-date").datepicker();
+// predict.js
 
-  $(".predict-btn").on("click", function () {
-    var dateValue = $("#predict-date").val().trim();
-    var predictionCard = $("#predictionCard");
-    var predictionLeft = $("#predictionLeft");
-    var predictionRight = $("#predictionRight");
+document.addEventListener("DOMContentLoaded", function () {
+  const predictButton = document.getElementById("predictButton");
+  const dateRangePickerInput = document.getElementById("date-range-picker");
+  const predictionCard = document.getElementById("predictionCard");
+  const predictionLeft = document.getElementById("predictionLeft");
+  const predictionRight = document.getElementById("predictionRight");
 
-    if (dateValue) {
-      // Show the prediction card if a date is selected
-      predictionCard.show();
+  // Initialize Litepicker
+  const picker = new Litepicker({
+    element: dateRangePickerInput,
+    singleMode: false, // Enable range selection
+    numberOfMonths: 2,
+    numberOfColumns: 2,
+    format: "YYYY-MM-DD",
+    tooltipText: { one: "day", other: "days" },
+    tooltipNumber: (totalDays) => totalDays - 1,
+  });
 
-      // Populate the left side with sample prediction data
-      predictionLeft.html(`
-          <h1 class="display-1 fw-bold">87%</h1>
-          <p class="fs-5">
-            Lot D21 and B2<br />
-            Lot S23 and R4<br />
-            Lot D2 and K8
-          </p>
-        `);
+  predictButton.addEventListener("click", function () {
+    const selectedDates = dateRangePickerInput.value.split(" - ");
 
-      // Populate the right side with additional details (placeholder text)
-      predictionRight.html(`
-          <h3 class="fw-bold">LOREM IPSUM TEXT</h3>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque in quam non orci venenatis tempor.
-          </p>
-          <p>
-            Fusce dignissim ex sit amet tellus tempus, non varius lorem imperdiet. Sed scelerisque tortor nec lorem blandit, eget facilisis magna luctus.
-          </p>
-        `);
-    } else {
-      // Hide the prediction card and clear its content if no date is selected
-      predictionCard.hide();
-      predictionLeft.empty();
-      predictionRight.empty();
+    if (selectedDates.length !== 2 || !selectedDates[0] || !selectedDates[1]) {
+      alert("Please select a valid start and end date.");
+      return;
     }
+
+    const startDate = selectedDates[0];
+    const endDate = selectedDates[1];
+
+    // Show result
+    predictionCard.style.display = "block";
+    predictionLeft.innerHTML = `
+      <h2>Selected Dates</h2>
+      <p><strong>Start:</strong> ${startDate}</p>
+      <p><strong>End:</strong> ${endDate}</p>
+    `;
+
+    predictionRight.innerHTML = `
+      <p>Prediction Results will go here...</p>
+    `;
+
+    console.log("Start:", startDate, "End:", endDate);
   });
 });
