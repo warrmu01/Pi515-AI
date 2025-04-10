@@ -4,45 +4,37 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_percenta
 from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 import numpy as np
+from joblib import dump
+import sys
+import os
 
-
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 from data_preparation.fish_survival_data_preparation import create_fish_pipeline, prepare_fish_data
 
 def evaluate_xgb(X_train, y_train, X_dev, y_dev):
     print("Evaluating XGBoost Regressor...")
 
-    # Define the hyperparameter grid search to try combinations of these hyperparameters.
     param_grid = {
         'algo__n_estimators': [1000],
         'algo__max_depth': [2, 3, 4],
-        'algo__learning_rate': [0.01, 0.05, 0.1], # smaller learning rate is possibly better as training consisitency increasees.
+        'algo__learning_rate': [0.01, 0.05, 0.1],
         'algo__subsample': [0.8, 1.0],
     }
 
-    # This here uses the pipeline to handle missing values, scaling, encoding, etc for teh dataset.
     pipeline = create_fish_pipeline()
 
-    # This combines the preprocessing and XGBoost model into one clean pipeline.
     pipeline_with_algo = Pipeline(steps=[
         ('preprocessor', pipeline),
-        ('algo', XGBRegressor(
-            objective='reg:squarederror',
-            random_state=42
-        ))
+        ('algo', XGBRegressor(objective='reg:squarederror', random_state=42))
     ])
 
     grid_search = GridSearchCV(
         pipeline_with_algo, param_grid,
-        cv=5,  # 5-fold cross-validation
-        scoring='neg_mean_squared_error',  
-        verbose=1  # Show progress in terminal
+        cv=5, scoring='neg_mean_squared_error', verbose=1
     )
     grid_search.fit(X_train, y_train)
-
-    # This shows us our best model based on cross-validation R² score.
     best_estimator = grid_search.best_estimator_
 
-    # 📊 FEATURE IMPORTANCE SECTION
     try:
         model = best_estimator.named_steps["algo"]
         preprocessor = best_estimator.named_steps["preprocessor"]
@@ -59,16 +51,11 @@ def evaluate_xgb(X_train, y_train, X_dev, y_dev):
     except Exception as e:
         print("Could not extract feature importances:", e)
 
-    # We are making predicitons on the dev set here
     y_pred = best_estimator.predict(X_dev)
-
-    # Here we are calculating the following values
-    # Calculate evaluation metrics
     rmse = np.sqrt(mean_squared_error(y_dev, y_pred))
     mape = mean_absolute_percentage_error(y_dev, y_pred)
     r2 = r2_score(y_dev, y_pred)
 
-    # Shows you the best performance from the training phase and the hyperparameters that gave it.
     print("Grid searching is done!")
     print("Best score (neg MSE):", grid_search.best_score_)
     print("Best hyperparameters:")
@@ -76,26 +63,6 @@ def evaluate_xgb(X_train, y_train, X_dev, y_dev):
 
     return best_estimator, rmse, mape, r2
 
-# Step 1: Prepare fish data (split into train/dev/test)
-X_train, X_dev, X_test, y_train, y_dev, y_test = prepare_fish_data(ratios=((1/10), (1/10)))
-
-# Step 2: Run hyperparameter tuning on train/dev sets
-best_model, dev_rmse, dev_mape, dev_r2 = evaluate_xgb(X_train, y_train, X_dev, y_dev)
-
-# 🔍 DEBUG: Show the sizes of the splits
-print("✅ Data Split Shapes:")
-print("  X_train:", X_train.shape)
-print("  X_dev:", X_dev.shape)
-print("  X_test:", X_test.shape)
-print("  y_train:", y_train.shape)
-print("  y_dev:", y_dev.shape)
-print("  y_test:", y_test.shape)
-
-# Step 1: Make predictions
-y_train_pred = best_model.predict(X_train)
-y_dev_pred = best_model.predict(X_dev)
-
-# Step 2: Define a reusable function to evaluate metrics
 def evaluate_metrics(y_true, y_pred, label):
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     mape = mean_absolute_percentage_error(y_true, y_pred)
@@ -108,7 +75,29 @@ def evaluate_metrics(y_true, y_pred, label):
     print(f"R²: {r2:.4f}")
     return rmse, mape, r2
 
-# Step 3: Print evaluation metrics
-train_rmse, train_mape, train_r2 = evaluate_metrics(y_train, y_train_pred, "Train")
-dev_rmse, dev_mape, dev_r2 = evaluate_metrics(y_dev, y_dev_pred, "Dev")
+def main():
+    print("\n🚀 Evaluating model for: Fish Survival")
+    X_train, X_dev, X_test, y_train, y_dev, y_test = prepare_fish_data(ratios=(1/10, 1/10))
+    best_model, _, _, _ = evaluate_xgb(X_train, y_train, X_dev, y_dev)
 
+    print("✅ Data Split Shapes:")
+    print("  X_train:", X_train.shape)
+    print("  X_dev:", X_dev.shape)
+    print("  X_test:", X_test.shape)
+    print("  y_train:", y_train.shape)
+    print("  y_dev:", y_dev.shape)
+    print("  y_test:", y_test.shape)
+
+    y_train_pred = best_model.predict(X_train)
+    y_dev_pred = best_model.predict(X_dev)
+    y_test_pred = best_model.predict(X_test)
+
+    evaluate_metrics(y_train, y_train_pred, "Train")
+    evaluate_metrics(y_dev, y_dev_pred, "Dev")
+    evaluate_metrics(y_test, y_test_pred, "Test")
+
+    dump(best_model, "models/fish_survival_model.joblib")
+    print("✅ Model saved as: models/fish_survival_model.joblib")
+
+if __name__ == "__main__":
+    main()
