@@ -47,6 +47,20 @@ PI515-AI/
 ```
 
 
+## 📌 Why Focus on RMSE and MAPE?
+
+In our evaluation, we emphasize **RMSE (Root Mean Squared Error)** and **MAPE (Mean Absolute Percentage Error)** rather than R² for the following reasons:
+
+- **Narrow Target Range**: The target variable — fish survival rate — lies in a very tight range (~99.9–100). This means that even small prediction errors can lead to very low or even negative R² values, making it a misleading metric in this context.
+  
+- **RMSE** gives a good indication of the absolute prediction error magnitude in the same units as the target variable.
+  
+- **MAPE** provides a scale-independent metric that shows how close predictions are in percentage terms — ideal for understanding model performance when values are close together.
+
+> ✅ A low RMSE and MAPE indicate that the predictions are accurate and consistent, even when R² may not reflect this due to the lack of target variance.
+
+
+
 ## 📊 Model Performance Summary
 
 ### 🌤️ Spring Temp (F) Prediction Model (XGBoost)
