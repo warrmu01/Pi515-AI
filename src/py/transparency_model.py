@@ -5,7 +5,11 @@ from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 import numpy as np
 
-from Data_Preparation.Transparency_data_preparation import create_transparency_pipeline, prepare_am_transparency_data, prepare_pm_transparency_data
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
+
+from data_preparation.Transparency_data_preparation import create_transparency_pipeline, prepare_am_transparency_data, prepare_pm_transparency_data
 
 def evaluate_xgb(X_train, y_train, X_dev, y_dev):
     print("Evaluating XGBoost Regressor...")
@@ -16,8 +20,6 @@ def evaluate_xgb(X_train, y_train, X_dev, y_dev):
         'algo__max_depth': [2, 3, 4],
         'algo__learning_rate': [0.01, 0.05, 0.1], # smaller learning rate is possibly better as training consisitency increasees.
         'algo__subsample': [0.8, 1.0],
-        # 'algo__reg_alpha': [0, 0.1, 1],               # L1 regularization (sparsity)
-        # 'algo__reg_lambda': [1, 2, 5]                 # L2 regularization (shrinkage)
     }
 
     # This here uses the pipeline to handle missing values, scaling, encoding, etc for teh dataset.

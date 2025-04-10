@@ -6,7 +6,7 @@ from sklearn.model_selection import GridSearchCV
 import numpy as np
 
 
-from Data_Preparation.fish_survival_data_preparation import create_fish_pipeline, prepare_fish_data
+from data_preparation.fish_survival_data_preparation import create_fish_pipeline, prepare_fish_data
 
 def evaluate_xgb(X_train, y_train, X_dev, y_dev):
     print("Evaluating XGBoost Regressor...")
