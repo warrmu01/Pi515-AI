@@ -6,6 +6,8 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.impute import KNNImputer
+from timeseries_utils import generate_time_series_features
+
 
 def load_fish_data():
     """
@@ -25,7 +27,7 @@ def load_fish_data():
         else:
             return "Fall"
 
-    df = pd.read_excel("../Data/Raw/Main_Data_edited.xlsx")
+    df = pd.read_excel("../../Data/Raw/Main_Data_edited.xlsx")
 
     # ✅ Convert dates and sort
     df["Date"] = pd.to_datetime(df["Date"])
@@ -52,18 +54,8 @@ def load_fish_data():
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
     df["Fish Age"] = df["Year"] - df["Year class"]
 
-    # ✅ Lag Features (1, 3, 7 days)
-    lag_features = [
-        "Spring Temp (F)", "AM Transparency", "PM Transparency", "Dec Rain", "Calmar Rain"
-    ]
-    for col in lag_features:
-        for lag in [3]:
-            df[f"{col} (Lag {lag})"] = df[col].shift(lag)
-
-    # ✅ 7-day Rolling Averages
-    for col in ["Spring Temp (F)", "AM Transparency", "PM Transparency", "Dec Rain", "Calmar Rain"]:
-        df[f"{col} 7-day avg"] = df[col].rolling(window=7, min_periods=7).mean()
-
+    ts_columns = ["Spring Temp (F)", "AM Transparency", "PM Transparency", "Dec Rain", "Calmar Rain"]
+    df = generate_time_series_features(df, cols=ts_columns, lags=[3], rolling_windows=[7])
 
     return df
 

@@ -6,8 +6,10 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.impute import KNNImputer
+from timeseries_utils import generate_time_series_features
 
-def load_fish_data():
+
+def load_spring_temp_data():
     def get_season(month):
         if month in [12, 1, 2]:
             return "Winter"
@@ -18,7 +20,7 @@ def load_fish_data():
         else:
             return "Fall"
 
-    df = pd.read_excel("../Data/Raw/Main_Data_edited.xlsx")
+    df = pd.read_excel("../../Data/Raw/Main_Data_edited.xlsx")
     df["Date"] = pd.to_datetime(df["Date"])
     df = df.sort_values("Date")
 
@@ -39,13 +41,8 @@ def load_fish_data():
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
     df["Fish Age"] = df["Year"] - df["Year class"]
 
-    # Lag features (weather only)
-    for col in ["Dec Rain", "Calmar Rain", "Max air temp"]:
-        df[f"{col} (Lag 3)"] = df[col].shift(3)
-
-    # Rolling averages
-    for col in ["Dec Rain", "Calmar Rain", "Max air temp"]:
-        df[f"{col} 7-day avg"] = df[col].rolling(window=7, min_periods=7).mean()
+    ts_columns = ["Max air temp", "Dec Rain", "Calmar Rain"]
+    df = generate_time_series_features(df, cols=ts_columns, lags=[3], rolling_windows=[7])
 
     return df
 
@@ -109,5 +106,5 @@ def split_spring_temp_data(df, ratios):
 
 # === Convenience Loader ===
 def prepare_spring_temp_data(ratios=(0.1, 0.1)):
-    df = load_fish_data()
+    df = load_spring_temp_data()
     return split_spring_temp_data(df, ratios)
