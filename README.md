@@ -46,6 +46,29 @@ PI515-AI/
 ├── README.md
 ```
 
+## 🔗 Chained Model Architecture
+
+The system follows a sequential prediction flow:
+
+1. **Input Features**
+   - Max/Min Air Temperature  
+   - Dec/Calmar Rain  
+   - Season, Day of Year  
+   - Time Series Features (Lag, Rolling Avg)  
+   ↓
+
+2. **Model 1: Predict Spring Temp (F)**
+   - Uses input features to predict water temperature  
+   ↓
+
+3. **Model 2: Predict Transparency (AM/PM)**
+   - Uses input features + predicted Spring Temp (F)  
+   ↓
+
+4. **Model 3: Predict Fish Survival Rate**
+   - Uses input features + predicted Spring Temp + predicted Transparency  
+
+
 
 ## 📌 Why Focus on RMSE and MAPE?
 
