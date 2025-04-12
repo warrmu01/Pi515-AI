@@ -4,8 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const predictButton = document.getElementById("predictButton");
   const dateRangePickerInput = document.getElementById("date-range-picker");
   const predictionCard = document.getElementById("predictionCard");
-  const predictionLeft = document.getElementById("predictionLeft");
-  const predictionRight = document.getElementById("predictionRight");
+  const predictionTableBody = document.querySelector("#predictionTable tbody");
 
   // Initialize Litepicker
   const picker = new Litepicker({
@@ -14,9 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
     numberOfMonths: 2,
     numberOfColumns: 2,
     format: "YYYY-MM-DD",
-    minDate: new Date(), // ✅ Block past dates
-    maxDate: addDays(new Date(), 5), // ✅ Block dates beyond 5 days from today
-    maxDays: 5, // ✅ Max range of 5 days
+    minDate: new Date(), // ✅ No past dates
+    maxDate: addDays(new Date(), 5), // ✅ No dates beyond 15 days
+    maxDays: 5, // ✅ Max 5 days range
     tooltipText: { one: "day", other: "days" },
     tooltipNumber: (totalDays) => totalDays,
   });
@@ -31,84 +30,84 @@ document.addEventListener("DOMContentLoaded", function () {
   // Predict button click event
   predictButton.addEventListener("click", async function () {
     const selectedDates = dateRangePickerInput.value.split(" - ");
+    const fishCount = document.getElementById("fish-count").value;
 
     if (selectedDates.length !== 2 || !selectedDates[0] || !selectedDates[1]) {
       alert("Please select a valid start and end date.");
       return;
     }
 
-    const startDate = selectedDates[0];
-    const endDate = selectedDates[1];
+    if (!fishCount) {
+      alert("Please enter the fish count.");
+      return;
+    }
 
-    // Show loading while fetching
-    predictionCard.style.display = "block";
-    predictionLeft.innerHTML = `
-      <h2>Selected Dates</h2>
-      <p><strong>Start:</strong> ${startDate}</p>
-      <p><strong>End:</strong> ${endDate}</p>
-    `;
-    predictionRight.innerHTML = `<p>Loading weather data...</p>`;
+    // Validate dates
+    const startDateObj = new Date(selectedDates[0]);
+    const endDateObj = new Date(selectedDates[1]);
+    const today = new Date();
+    const maxAllowedDate = addDays(today, 15);
+
+    if (endDateObj > maxAllowedDate) {
+      alert("End date cannot be more than 15 days from today.");
+      return;
+    }
+
+    const rangeInDays = (endDateObj - startDateObj) / (1000 * 60 * 60 * 24);
+    if (rangeInDays > 5) {
+      alert("Date range cannot exceed 5 days.");
+      return;
+    }
 
     try {
-      // Fetch weather for Decorah
-      const decorahWeather = await fetchWeather(
-        43.303,
-        -91.7857,
-        startDate,
-        endDate
-      );
+      // Show loading
+      predictionCard.style.display = "block";
+      predictionTableBody.innerHTML = `<tr><td colspan="5">Loading predictions...</td></tr>`;
 
-      // Fetch weather for Calmar
-      const calmarWeather = await fetchWeather(
-        43.1819,
-        -91.866,
-        startDate,
-        endDate
-      );
+      // 🚀 Send request to Flask backend
+      const response = await fetch("/predict", {
+        // Update this if your backend endpoint is different
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          start_date: selectedDates[0],
+          end_date: selectedDates[1],
+          fish_count: fishCount,
+        }),
+      });
 
-      // Show results
-      predictionRight.innerHTML = `
-        <h3>Decorah Weather:</h3>
-        <p><strong>Max Temp:</strong> ${decorahWeather.avgMaxTemp}°C</p>
-        <p><strong>Min Temp:</strong> ${decorahWeather.avgMinTemp}°C</p>
-        <p><strong>December Rain (Total):</strong> ${decorahWeather.totalRain} mm</p>
-        <hr />
-        <h3>Calmar Weather:</h3>
-        <p><strong>Max Temp:</strong> ${calmarWeather.avgMaxTemp}°C</p>
-        <p><strong>Min Temp:</strong> ${calmarWeather.avgMinTemp}°C</p>
-        <p><strong>Calmar Rain (Total):</strong> ${calmarWeather.totalRain} mm</p>
-      `;
+      const predictionData = await response.json();
 
-      console.log("Decorah Weather:", decorahWeather);
-      console.log("Calmar Weather:", calmarWeather);
+      console.log("Prediction Data:", predictionData);
+
+      // Populate table with predictions
+      populatePredictionTable(predictionData);
     } catch (error) {
-      console.error("Error fetching weather:", error);
-      predictionRight.innerHTML = `<p>Failed to fetch weather data.</p>`;
+      console.error("Error fetching predictions:", error);
+      predictionTableBody.innerHTML = `<tr><td colspan="5">Failed to fetch predictions.</td></tr>`;
     }
   });
 
-  // Fetch weather helper function
-  async function fetchWeather(lat, lon, start, end) {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&start_date=${start}&end_date=${end}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=America%2FChicago`;
+  // Function to populate the prediction table
+  function populatePredictionTable(predictionData) {
+    const tableBody = document.querySelector("#predictionTable tbody");
 
-    const response = await fetch(url);
-    const data = await response.json();
+    tableBody.innerHTML = ""; // Clear old data
 
-    const tempsMax = data.daily.temperature_2m_max;
-    const tempsMin = data.daily.temperature_2m_min;
-    const rains = data.daily.precipitation_sum;
+    predictionData.forEach((entry) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${entry.date}</td>
+        <td>${entry.survival.toFixed(2)}</td>
+        <td>${entry.am_transparency}</td>
+        <td>${entry.pm_transparency}</td>
+        <td>${entry.risk}</td>
+      `;
+      tableBody.appendChild(row);
+    });
 
-    // Calculate averages for temps
-    const avgMaxTemp = (
-      tempsMax.reduce((a, b) => a + b, 0) / tempsMax.length
-    ).toFixed(1);
-    const avgMinTemp = (
-      tempsMin.reduce((a, b) => a + b, 0) / tempsMin.length
-    ).toFixed(1);
-
-    // Calculate total rain
-    const totalRain = rains.reduce((a, b) => a + b, 0).toFixed(1);
-
-    return { avgMaxTemp, avgMinTemp, totalRain };
+    predictionCard.style.display = "block"; // Show the prediction card
   }
 });
