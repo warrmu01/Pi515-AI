@@ -78,9 +78,25 @@
         class="predict-result-card p-4 text-center"
         style="display: none"
       >
-        <div class="row">
-          <div class="col-md-6 mb-3 mb-md-0" id="predictionLeft"></div>
-          <div class="col-md-6" id="predictionRight"></div>
+        <!-- Prediction Table -->
+        <div class="table-responsive">
+          <table
+            id="predictionTable"
+            class="table table-bordered table-hover table-striped"
+          >
+            <thead class="table-light">
+              <tr>
+                <th>Date</th>
+                <th>Survival Rate (%)</th>
+                <th>AM Transparency</th>
+                <th>PM Transparency</th>
+                <th>Risk Level</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Table rows will be inserted dynamically here -->
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
