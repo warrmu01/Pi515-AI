@@ -23,11 +23,15 @@ PI515-AI/
 │   │   ├── fish_survival_data_preparation.ipynb
 │   │   ├── fish_survival_data_preparation.py
 │   │   ├── Spring_temp_data_preparation.py
+│   │   ├── Spring_temp_data_preparation.ipynb
 │   │   ├── Transparency_data_preparation.ipynb
 │   │   └── Transparency_data_preparation.py
 │   │
 │   ├── models/
-│   │   └── (trained .joblib model files go here)
+│   │   └── am_transparency_model.joblib
+│   │   └── pm_transparency_model.joblib
+│   │   └── fish_survial_model.joblib
+│   │   └── spring_temp_model.joblib
 │   │
 │   ├── notebooks/
 │   │   ├── fish_survival_model.ipynb
