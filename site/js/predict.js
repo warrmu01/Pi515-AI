@@ -15,12 +15,20 @@ document.addEventListener("DOMContentLoaded", function () {
     numberOfColumns: 2,
     format: "YYYY-MM-DD",
     minDate: new Date(), // ✅ Block past dates
-    maxDays: 10, // ✅ Max 10 days range
+    maxDate: addDays(new Date(), 5), // ✅ Block dates beyond 5 days from today
+    maxDays: 5, // ✅ Max range of 5 days
     tooltipText: { one: "day", other: "days" },
-    tooltipNumber: (totalDays) => totalDays - 1,
+    tooltipNumber: (totalDays) => totalDays,
   });
 
-  // On Predict button click
+  // Helper function to add days to a date
+  function addDays(date, days) {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  // Predict button click event
   predictButton.addEventListener("click", async function () {
     const selectedDates = dateRangePickerInput.value.split(" - ");
 
@@ -48,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
         -91.7857,
         startDate,
         endDate
-      ); // Decorah coordinates
+      );
 
       // Fetch weather for Calmar
       const calmarWeather = await fetchWeather(
@@ -56,20 +64,20 @@ document.addEventListener("DOMContentLoaded", function () {
         -91.866,
         startDate,
         endDate
-      ); // Calmar coordinates
+      );
 
       // Show results
       predictionRight.innerHTML = `
-  <h3>Decorah Weather:</h3>
-  <p><strong>Max Temp:</strong> ${decorahWeather.avgMaxTemp}°C</p>
-  <p><strong>Min Temp:</strong> ${decorahWeather.avgMinTemp}°C</p>
-  <p><strong>December Rain (Total):</strong> ${decorahWeather.totalRain} mm</p>
-  <hr />
-  <h3>Calmar Weather:</h3>
-  <p><strong>Max Temp:</strong> ${calmarWeather.avgMaxTemp}°C</p>
-  <p><strong>Min Temp:</strong> ${calmarWeather.avgMinTemp}°C</p>
-  <p><strong>Calmar Rain (Total):</strong> ${calmarWeather.totalRain} mm</p>
-`;
+        <h3>Decorah Weather:</h3>
+        <p><strong>Max Temp:</strong> ${decorahWeather.avgMaxTemp}°C</p>
+        <p><strong>Min Temp:</strong> ${decorahWeather.avgMinTemp}°C</p>
+        <p><strong>December Rain (Total):</strong> ${decorahWeather.totalRain} mm</p>
+        <hr />
+        <h3>Calmar Weather:</h3>
+        <p><strong>Max Temp:</strong> ${calmarWeather.avgMaxTemp}°C</p>
+        <p><strong>Min Temp:</strong> ${calmarWeather.avgMinTemp}°C</p>
+        <p><strong>Calmar Rain (Total):</strong> ${calmarWeather.totalRain} mm</p>
+      `;
 
       console.log("Decorah Weather:", decorahWeather);
       console.log("Calmar Weather:", calmarWeather);
@@ -98,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
       tempsMin.reduce((a, b) => a + b, 0) / tempsMin.length
     ).toFixed(1);
 
-    // ✅ Now total rain, NOT average rain
+    // Calculate total rain
     const totalRain = rains.reduce((a, b) => a + b, 0).toFixed(1);
 
     return { avgMaxTemp, avgMinTemp, totalRain };
