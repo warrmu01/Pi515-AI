@@ -5,9 +5,6 @@
 ```
 PI515-AI/
 ├── Data/
-│   ├── Prepared/
-│   │   ├── preprocessed_test_data.xlsx
-│   │   └── preprocessed_train_data.xlsx
 │   └── Raw/
 │       ├── Harvest_Summary.xlsx
 │       ├── Main_Data.xlsx
