@@ -17,14 +17,18 @@ body {
 .aquavitals-heading {
   font-size: 7rem; /* Adjust size here */
   font-weight: 700; /* Bold */
-  color: #333; /* Dark text */
-  /* margin-bottom: 1rem; */
+  color: #080536; /* Dark text */
 }
 .aquavitals-subheading {
   font-size: 2rem; /* Adjust size here */
-  font-weight: 400; /* Bold */
-  color: #333; /* Dark text */
+  font-weight: 500; /* Bold */
+  color: #080536; /* Dark text */
   margin-bottom: 1rem;
+}
+.aquavitals-smallheading {
+  font-size: 1.4rem; /* Adjust size here */
+  font-weight: 500; /* Bold */
+  color: #080536; /* Dark text */
 }
 html,
 body {
@@ -32,20 +36,21 @@ body {
 }
 /* Override link styles */
 .link-light {
-  color: #333 !important;
+  color: #080536 !important;
 }
 
 /* Outline button styles */
 .btn-outline-light {
-  border-color: #333 !important;
-  color: #333 !important;
+  border-color: #080536 !important;
+  color: #080536 !important;
+  font-weight: 500;
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
 .btn-outline-light:hover,
 .btn-outline-light:focus,
 .btn-outline-light:active {
-  background-color: #333 !important;
+  background-color: #080536 !important;
   color: #e0f7fa !important;
   box-shadow: none !important;
 }
