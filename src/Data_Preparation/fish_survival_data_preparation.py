@@ -55,7 +55,7 @@ def load_fish_data():
     df["Fish Age"] = df["Year"] - df["Year class"]
 
     ts_columns = ["Spring Temp (F)", "AM Transparency", "PM Transparency", "Dec Rain", "Calmar Rain"]
-    df = generate_time_series_features(df, cols=ts_columns, lags=[3], rolling_windows=[7])
+    df = generate_time_series_features(df, cols=ts_columns, lags=[3,2,1], rolling_windows=[7])
 
     return df
 
@@ -66,11 +66,9 @@ def create_fish_pipeline():
     Now assumes transparency features are already imputed in load_fish_data().
     """
 
-    # All numerical features including lag & rolling features
     numerical_features = [
         "Spring Temp (F)", "Max air temp", "Min air temp", "Dec Rain", "Calmar Rain",
         "# fish", "Spring_Temp x Rain", "Max Air Temp x Rain", 
-        "Day of Year", "Fish Age",
         # Lag features
         "Spring Temp (F) (Lag 3)", "AM Transparency (Lag 3)", "PM Transparency (Lag 3)", 
         "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)",
@@ -81,8 +79,9 @@ def create_fish_pipeline():
         "AM Transparency", "PM Transparency"
     ]
 
-    # Categorical features
-    categorical_features = ["AM Feed", "PM Feed", "Season"]
+
+    transparency_features = ["AM Transparency", "PM Transparency"]
+    categorical_features = ["Season"]
 
     # Transformer for numeric features
     num_transformer = Pipeline(steps=[
@@ -90,16 +89,21 @@ def create_fish_pipeline():
         ("scaler", StandardScaler())
     ])
 
+    # KNN imputation for transparency columns
+    transparency_transformer = Pipeline(steps=[
+        ("imputer", KNNImputer(n_neighbors=5))
+    ])
+
     # Optional: Add back categorical pipeline if needed
     cat_transformer = Pipeline(steps=[
         ("onehot", OneHotEncoder(handle_unknown="ignore"))
     ])
 
-    # Combine all preprocessing
     preprocessor = ColumnTransformer(transformers=[
         ("num", num_transformer, numerical_features),
-        ("cat", cat_transformer, categorical_features),  # if using categories
+        ("cat", cat_transformer, categorical_features),
     ])
+
 
     pipeline = Pipeline(steps=[
         ("preprocessor", preprocessor)
@@ -116,10 +120,9 @@ def split_fish_data(df, ratios):
 
 
     selected_features = [
-        "AM Feed", "AM Transparency", "PM Feed", "PM Transparency",
+        "AM Transparency", "PM Transparency",
         "Spring Temp (F)", "# fish", "Dec Rain", "Max air temp", "Min air temp", "Calmar Rain",
         "Season", "Spring_Temp x Rain", "Max Air Temp x Rain", "Total Rain",
-        "Day of Year", "Fish Age",
         # Lag features
         "Spring Temp (F) (Lag 3)",
         "AM Transparency (Lag 3)", 
@@ -137,8 +140,6 @@ def split_fish_data(df, ratios):
     X = df[selected_features]
     y = df["Fish survival rate"]
 
-    X = df[selected_features]
-    y = df["Fish survival rate"]
 
     dev_ratio, test_ratio = ratios
     total_len = len(X)
