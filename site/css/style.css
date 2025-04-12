@@ -17,13 +17,13 @@ body {
 .aquavitals-heading {
   font-size: 7rem; /* Adjust size here */
   font-weight: 700; /* Bold */
-  color: #333; /* Dark text */
+  color: rgb(0, 0, 61); /* Dark blue text */
   /* margin-bottom: 1rem; */
 }
 .aquavitals-subheading {
   font-size: 2rem; /* Adjust size here */
   font-weight: 400; /* Bold */
-  color: #333; /* Dark text */
+  color: rgb(0, 0, 61); /* Dark blue text */
   margin-bottom: 1rem;
 }
 html,
@@ -32,13 +32,13 @@ body {
 }
 /* Override link styles */
 .link-light {
-  color: #333 !important;
+  color: rgb(0, 0, 61); /* Dark blue text */
 }
 
 /* Outline button styles */
 .btn-outline-light {
   border-color: #333 !important;
-  color: #333 !important;
+  color: rgb(0, 0, 61); /* Dark blue text */
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
