@@ -13,6 +13,21 @@ PI515-AI/
 ├── Output/
 ├── Plots/
 │
+├── site/
+│   │
+│   ├── js/
+│   │   ├── predict.js
+│   │   └── script.js
+│   │
+│   ├── css/
+│   │   ├── predict.css
+│   │   └── script.css
+│   │
+│   ├── about.html
+│   ├── index.html
+│   ├── predict.html
+│   └── Transparency.html
+│ 
 ├── src/
 │   ├── __pycache__/
 │   │
