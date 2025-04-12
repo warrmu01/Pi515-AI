@@ -52,8 +52,7 @@ def create_transparency_pipeline():
     numerical_features = [
         "Spring Temp (F)", "Max air temp", "Min air temp", "Dec Rain", "Calmar Rain",
         "# fish", "Spring_Temp x Rain", "Max Air Temp x Rain",
-        "Total Rain", "Day of Year", "Fish Age",
-        "Spring Temp (F) (Lag 3)", "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)",
+        "Total Rain","Spring Temp (F) (Lag 3)", "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)",
         "Spring Temp (F) 7-day avg", "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
     ]
 
@@ -83,12 +82,15 @@ def split_transparency_data(df, target_col, ratios):
     df = df.sample(frac=1, random_state=42)
 
     features = [
-        "Spring Temp (F)", "# fish", "Dec Rain",
-        "Max air temp", "Min air temp", "Calmar Rain", "Season",
-        "Spring_Temp x Rain", "Max Air Temp x Rain", "Total Rain",
-        "Day of Year", "Fish Age",
-        "Spring Temp (F) (Lag 3)", "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)",
-        "Spring Temp (F) 7-day avg", "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
+        "Spring Temp (F)", "# fish", "Dec Rain", "Max air temp", "Min air temp", "Calmar Rain",
+        "Season", "Spring_Temp x Rain", "Max Air Temp x Rain", "Total Rain",
+        # Lag features
+        "Spring Temp (F) (Lag 3)",
+        "Dec Rain (Lag 3)", 
+        "Calmar Rain (Lag 3)", 
+        # Rolling averages
+        "Spring Temp (F) 7-day avg",
+        "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
     ]
 
     df = df.dropna(subset=features + [target_col])

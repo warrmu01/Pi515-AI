@@ -50,9 +50,7 @@ def load_spring_temp_data():
 def create_spring_temp_pipeline():
     numerical_features = [
         "Max air temp", "Min air temp", "Dec Rain", "Calmar Rain",
-        "Max Air Temp x Rain", "Total Rain", "Day of Year", "Fish Age",
-        "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)", "Max air temp (Lag 3)",
-        "Dec Rain 7-day avg", "Calmar Rain 7-day avg", "Max air temp 7-day avg"
+        "Max Air Temp x Rain", "Total Rain", 
     ]
 
     categorical_features = ["Season"]
@@ -78,9 +76,7 @@ def split_spring_temp_data(df, ratios):
 
     features = [
         "Max air temp", "Min air temp", "Dec Rain", "Calmar Rain", "Season",
-        "Max Air Temp x Rain", "Total Rain", "Day of Year", "Fish Age",
-        "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)", "Max air temp (Lag 3)",
-        "Dec Rain 7-day avg", "Calmar Rain 7-day avg", "Max air temp 7-day avg"
+        "Max Air Temp x Rain", "Total Rain",
     ]
 
     df = df.dropna(subset=features + ["Spring Temp (F)"])
