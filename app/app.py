@@ -194,10 +194,10 @@ def predict_api():
 
 
     try:
-        spring_model = joblib.load("models/saved_models/spring_temp_model.joblib")
-        am_model = joblib.load("models/saved_models/am_transparency_model.joblib")
-        pm_model = joblib.load("models/saved_models/pm_transparency_model.joblib")
-        fish_model = joblib.load("models/saved_models/fish_survial_model.joblib")
+        spring_model = joblib.load("models/spring_temp_model.joblib")
+        am_model = joblib.load("models/am_transparency_model.joblib")
+        pm_model = joblib.load("models/pm_transparency_model.joblib")
+        fish_model = joblib.load("models/fish_survial_model.joblib")
     except Exception as e:
         return jsonify({"error": f"Failed to load models: {e}"}), 500
     
