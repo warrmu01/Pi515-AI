@@ -86,9 +86,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${entry.date}</td>
-          <td>${entry.predicted_survival.toFixed(2)}</td>
           <td>${entry.am_transparency.toFixed(2)}</td>
           <td>${entry.pm_transparency.toFixed(2)}</td>
+          <td>${entry.predicted_survival.toFixed(2)}</td>
           <td>${entry.risk_level}</td>
         `;
         predictionTableBody.appendChild(row);
