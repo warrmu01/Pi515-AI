@@ -1,6 +1,6 @@
 # Pi515-AI
 
-## 📁 Project Structure
+## 📁 Project Structure.
 
 ```
 PI515-AI/
