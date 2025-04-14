@@ -123,7 +123,7 @@ The system follows a sequential prediction flow:
 
 In our evaluation, we emphasize **RMSE (Root Mean Squared Error)** and **MAPE (Mean Absolute Percentage Error)** rather than R² for the following reasons:
 
-- **Narrow Target Range**: The target variable — fish survival rate — lies in a very tight range (~99.9–100). This means that even small prediction errors can lead to very low or even negative R² values, making it a misleading metric in this context.
+- **Narrow Target Range**: The target variable — fish survival rate — lies in a very tight range (~99.2–100). This means that even small prediction errors can lead to very low or even negative R² values, making it a misleading metric in this context.
   
 - **RMSE** gives a good indication of the absolute prediction error magnitude in the same units as the target variable.
   
