@@ -1,6 +1,6 @@
 # Pi515-AI
 
-## 🧠 Technical Documentation
+## Documentation
 
 ### 🔍 Overview
 
@@ -195,11 +195,14 @@ In our evaluation, we emphasize **RMSE (Root Mean Squared Error)** and **MAPE (M
   - MAPE: **0.0004**
   - R²: **-0.1350**
 
+---
+
+
 # ⚙️ How to Run Locally
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/aquavitals.git
+   git clone [https://github.com/yourusername/aquavitals.git]
    cd aquavitals
    ```
 
