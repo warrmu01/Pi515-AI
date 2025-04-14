@@ -195,3 +195,42 @@ In our evaluation, we emphasize **RMSE (Root Mean Squared Error)** and **MAPE (M
   - MAPE: **0.0004**
   - R²: **-0.1350**
 
+# ⚙️ How to Run Locally
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/aquavitals.git
+   cd aquavitals
+   ```
+
+2. Create and activate a virtual environment
+   
+   **macOS/Linux:**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   ```
+   
+   **Windows:**
+   ```bash
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
+
+3. Install dependencies
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Run the Flask app
+   ```bash
+   python app.py
+   ```
+
+5. Open the app in your browser
+   Go to:
+   ```
+   http://localhost:5000
+   ```
+
+✅ **Note:** Ensure all .joblib model files are present in the src/models/ directory before running the app.
