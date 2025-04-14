@@ -222,9 +222,6 @@ def predict_api():
 
     df["Spring_Temp x Rain"] = df["Spring Temp (F)"] * (df["Dec Rain"] + df["Calmar Rain"])
 
-
-
-
     df = generate_time_series_features(df, cols=[
         "Spring Temp (F)", "Dec Rain", "Calmar Rain"
     ], lags=[3,2,1], rolling_windows=[7])
@@ -247,8 +244,9 @@ def predict_api():
         survival = min(max(fish_model.predict(row)[0], 0.0), 100.0)
 
         risk = "High" if (
-            survival < 99.92 or am_trans < 30 or pm_trans < 30 or am_trans < 0 or pm_trans < 0
+            survival < 99.92 or am_trans < 30 and pm_trans < 30 or am_trans < 0 or pm_trans < 0
         ) else "Low"
+
 
         results.append({
             "date": str(row["Date"].values[0])[:10],
