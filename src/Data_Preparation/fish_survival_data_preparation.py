@@ -68,15 +68,16 @@ def create_fish_pipeline():
 
     numerical_features = [
         "Spring Temp (F)", "Max air temp", "Min air temp", "Dec Rain", "Calmar Rain",
-        "# fish", "Spring_Temp x Rain", "Max Air Temp x Rain", 
+        "# fish", "Spring_Temp x Rain", "Max Air Temp x Rain",
         # Lag features
-        "Spring Temp (F) (Lag 3)", "AM Transparency (Lag 3)", "PM Transparency (Lag 3)", 
         "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)",
-        # Rolling averages
-        "Spring Temp (F) 7-day avg", "AM Transparency 7-day avg", "PM Transparency 7-day avg",
+        # "AM Transparency (Lag 2)", "PM Transparency (Lag 2)", 
+        "Dec Rain (Lag 2)", "Calmar Rain (Lag 2)",
+        # "AM Transparency (Lag 1)", "PM Transparency (Lag 1)", 
+        "Dec Rain (Lag 1)", "Calmar Rain (Lag 1)",
+        # "AM Transparency 7-day avg", "PM Transparency 7-day avg",
         "Dec Rain 7-day avg", "Calmar Rain 7-day avg",
-        # Direct transparency features (now clean!)
-        "AM Transparency", "PM Transparency"
+ 
     ]
 
 
@@ -101,6 +102,7 @@ def create_fish_pipeline():
 
     preprocessor = ColumnTransformer(transformers=[
         ("num", num_transformer, numerical_features),
+        ("transparency", transparency_transformer, transparency_features),
         ("cat", cat_transformer, categorical_features),
     ])
 
@@ -120,18 +122,18 @@ def split_fish_data(df, ratios):
 
 
     selected_features = [
-        "AM Transparency", "PM Transparency",
-        "Spring Temp (F)", "# fish", "Dec Rain", "Max air temp", "Min air temp", "Calmar Rain",
-        "Season", "Spring_Temp x Rain", "Max Air Temp x Rain", "Total Rain",
+        "Spring Temp (F)", "Max air temp", "Min air temp", "Dec Rain", "Calmar Rain",
+        "# fish", "Spring_Temp x Rain", "Max Air Temp x Rain", "Season",
         # Lag features
-        "Spring Temp (F) (Lag 3)",
-        "AM Transparency (Lag 3)", 
-        "PM Transparency (Lag 3)", 
-        "Dec Rain (Lag 3)", 
-        "Calmar Rain (Lag 3)", 
-        # Rolling averages
-        "Spring Temp (F) 7-day avg", "AM Transparency 7-day avg", "PM Transparency 7-day avg",
-        "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
+        "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)",
+        # "AM Transparency (Lag 2)", "PM Transparency (Lag 2)", 
+        "Dec Rain (Lag 2)", "Calmar Rain (Lag 2)",
+        # "AM Transparency (Lag 1)", "PM Transparency (Lag 1)", 
+        "Dec Rain (Lag 1)", "Calmar Rain (Lag 1)",
+        # "AM Transparency 7-day avg", "PM Transparency 7-day avg",
+        "Dec Rain 7-day avg", "Calmar Rain 7-day avg",
+        # Direct transparency features (now clean!)
+        "AM Transparency", "PM Transparency"
     ]
 
     # Drop early rows with NaNs from lag/rolling

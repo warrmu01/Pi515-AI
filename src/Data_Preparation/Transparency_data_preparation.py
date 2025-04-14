@@ -38,12 +38,11 @@ def load_transparency__data():
     df["Total Rain"] = df["Dec Rain"] + df["Calmar Rain"]
     df["Day of Year"] = df["Date"].dt.dayofyear
 
-    df["Year class"] = pd.to_numeric(df["Year class"], errors="coerce")
     df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
-    df["Fish Age"] = df["Year"] - df["Year class"]
+  
 
-    ts_columns = ["Spring Temp (F)", "Dec Rain", "Calmar Rain"]
-    df = generate_time_series_features(df, cols=ts_columns, lags=[3], rolling_windows=[7])
+    ts_columns = ["Dec Rain", "Calmar Rain"]
+    df = generate_time_series_features(df, cols=ts_columns, lags=[3,2,1], rolling_windows=[7])
 
     return df
 
@@ -52,8 +51,9 @@ def create_transparency_pipeline():
     numerical_features = [
         "Spring Temp (F)", "Max air temp", "Min air temp", "Dec Rain", "Calmar Rain",
         "# fish", "Spring_Temp x Rain", "Max Air Temp x Rain",
-        "Total Rain","Spring Temp (F) (Lag 3)", "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)",
-        "Spring Temp (F) 7-day avg", "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
+        "Total Rain", "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)", "Dec Rain (Lag 2)", "Calmar Rain (Lag 2)",
+        "Dec Rain (Lag 1)", "Calmar Rain (Lag 1)",
+        "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
     ]
 
     categorical_features = ["Season"]
@@ -85,11 +85,13 @@ def split_transparency_data(df, target_col, ratios):
         "Spring Temp (F)", "# fish", "Dec Rain", "Max air temp", "Min air temp", "Calmar Rain",
         "Season", "Spring_Temp x Rain", "Max Air Temp x Rain", "Total Rain",
         # Lag features
-        "Spring Temp (F) (Lag 3)",
         "Dec Rain (Lag 3)", 
         "Calmar Rain (Lag 3)", 
+        "Dec Rain (Lag 2)", 
+        "Calmar Rain (Lag 2)", 
+        "Dec Rain (Lag 1)", 
+        "Calmar Rain (Lag 1)", 
         # Rolling averages
-        "Spring Temp (F) 7-day avg",
         "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
     ]
 

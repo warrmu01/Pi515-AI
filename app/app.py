@@ -140,7 +140,6 @@ def process_dates():
     start_date = data.get('start_date')
     end_date = data.get('end_date')
     fish_count = data.get('fish_count')
-    year_class = data.get('year_class')
     
     # Calculate date range
     start = datetime.strptime(start_date, '%Y-%m-%d')
@@ -223,9 +222,6 @@ def predict_api():
 
     df["Spring_Temp x Rain"] = df["Spring Temp (F)"] * (df["Dec Rain"] + df["Calmar Rain"])
 
-
-
-
     df = generate_time_series_features(df, cols=[
         "Spring Temp (F)", "Dec Rain", "Calmar Rain"
     ], lags=[3,2,1], rolling_windows=[7])
@@ -244,22 +240,19 @@ def predict_api():
         row["AM Transparency"] = am_trans
         row["PM Transparency"] = pm_trans
 
-        row["AM Transparency (Lag 3)"] = am_trans - 0.5
-        row["PM Transparency (Lag 3)"] = pm_trans - 0.5
-        row["AM Transparency 7-day avg"] = am_trans - 0.3
-        row["PM Transparency 7-day avg"] = pm_trans - 0.3
 
-        survival = fish_model.predict(row)[0]
+        survival = min(max(fish_model.predict(row)[0], 0.0), 100.0)
 
         risk = "High" if (
-            survival < 99.8 or am_trans < 15 or pm_trans < 15 or am_trans < 0 or pm_trans < 0
+            survival < 99.92 or am_trans < 30 and pm_trans < 30 or am_trans < 0 or pm_trans < 0
         ) else "Low"
+
 
         results.append({
             "date": str(row["Date"].values[0])[:10],
-            "predicted_survival": float(round(survival, 4)),
             "am_transparency": float(round(am_trans, 2)),
             "pm_transparency": float(round(pm_trans, 2)),
+            "predicted_survival": float(round(survival, 4)),
             "risk_level": risk
         })
 
