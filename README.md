@@ -34,14 +34,13 @@
 PI515-AI/
 ├── Data/
 │   └── Raw/
-│       ├── Harvest_Summary.xlsx
 │       ├── Main_Data.xlsx
 │       └── Main_Data_edited.xlsx
 │
 ├── Output/
 ├── Plots/
 │
-├── site/
+├── app/
 │   │
 │   ├── js/
 │   │   ├── predict.js
@@ -51,10 +50,15 @@ PI515-AI/
 │   │   ├── predict.css
 │   │   └── script.css
 │   │
+│   ├── models/
+│   │   └── am_transparency_model.joblib
+│   │   └── pm_transparency_model.joblib
+│   │   └── fish_survial_model.joblib
+│   │   └── spring_temp_model.joblib
+│   │
 │   ├── about.html
 │   ├── index.html
-│   ├── predict.html
-│   └── Transparency.html
+│   └── predict.html
 │ 
 ├── src/
 │   ├── __pycache__/
