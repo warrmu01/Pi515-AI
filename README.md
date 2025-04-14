@@ -116,6 +116,7 @@ The system follows a sequential prediction flow:
 4. **Model 3: Predict Fish Survival Rate**
    - Uses input features + predicted Spring Temp + predicted Transparency  
 
+---
 
 
 ## 📌 Why Focus on RMSE and MAPE?
@@ -130,6 +131,7 @@ In our evaluation, we emphasize **RMSE (Root Mean Squared Error)** and **MAPE (M
 
 > ✅ A low RMSE and MAPE indicate that the predictions are accurate and consistent, even when R² may not reflect this due to the lack of target variance.
 
+---
 
 ## 📊 Model Performance Summary
 
@@ -241,3 +243,6 @@ In our evaluation, we emphasize **RMSE (Root Mean Squared Error)** and **MAPE (M
    ```
 
 ✅ **Note:** Ensure all .joblib model files are present in the src/models/ directory before running the app.
+
+---
+
