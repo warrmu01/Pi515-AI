@@ -4,7 +4,7 @@
 
 ### 🔍 Overview
 
-**AquaVitals** is a full-stack AI-powered tool that predicts weekly fish survival rates using environmental features such as rainfall, temperature, and water transparency. Built using a Flask backend and a lightweight HTML/JS frontend, it delivers real-time predictions through a user-friendly interface. The backend integrates weather APIs and XGBoost regression models for temperature, transparency, and survival.
+**AquaVitals** is a full-stack AI-powered tool that predicts weekly fish survival rates using environmental features such as rainfall, temperature, and water transparency. Built using a Flask backend and a lightweight HTML/JS frontend, it delivers real-time predictions through a user-friendly interface. The backend integrates weather APIs and XGBoost regression models for spring temperature, transparency, and survival.
 
 ---
 
