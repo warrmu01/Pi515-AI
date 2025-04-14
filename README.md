@@ -1,6 +1,34 @@
 # Pi515-AI
 
+## 🧠 Technical Documentation
+
+### 🔍 Overview
+
+**AquaVitals** is a full-stack AI-powered tool that predicts weekly fish survival rates using environmental features such as rainfall, temperature, and water transparency. Built using a Flask backend and a lightweight HTML/JS frontend, it delivers real-time predictions through a user-friendly interface. The backend integrates weather APIs and XGBoost regression models for temperature, transparency, and survival.
+
+---
+
+### 🏗️ System Architecture
+
+- **Frontend**
+  - Built with HTML, CSS, and JavaScript
+  - Uses Litepicker for intuitive date range selection
+  - Collects user input (date range, fish count)
+  - Displays predictions in a readable table
+
+- **Backend (Flask)**
+  - Two primary endpoints:
+    - `POST /process_dates`: Fetches rainfall & temperature forecast from external APIs
+    - `POST /predict`: Chains predictions through XGBoost models to output:
+      - Spring temperature
+      - Morning & afternoon transparency
+      - Fish survival rate and risk level
+  - Models loaded via `.joblib` files from the `src/models/` directory
+
+---
+
 ## 📁 Project Structure.
+
 
 ```
 PI515-AI/
