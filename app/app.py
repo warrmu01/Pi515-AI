@@ -4,6 +4,8 @@ import requests
 import joblib
 import pandas as pd
 import numpy as np
+from sentence_transformers import SentenceTransformer
+
 
 
 app = Flask(__name__, 
@@ -122,14 +124,14 @@ def get_weather_data(dec_lat, dec_lon, cal_lat, cal_lon, start_date, end_date, f
             }
             formatted_data["forecast"].append(day_data)
         
-        print("\nFormatted Weather Data:")
-        print("=" * 50)
-        import json
-        print(json.dumps(formatted_data, indent=2))
+        # print("\nFormatted Weather Data:")
+        # print("=" * 50)
+        # import json
+        # print(json.dumps(formatted_data, indent=2))
         
         return formatted_data
     else:
-        print(f"Error: Unable to fetch data. Decorah status: {dec_response.status_code}, Calmar status: {cal_response.status_code}")
+        # print(f"Error: Unable to fetch data. Decorah status: {dec_response.status_code}, Calmar status: {cal_response.status_code}")
         return None
 
 @app.route('/process_dates', methods=['POST'])
@@ -140,6 +142,8 @@ def process_dates():
     start_date = data.get('start_date')
     end_date = data.get('end_date')
     fish_count = data.get('fish_count')
+    caretaker_comment = data.get('caretaker_comment', '')
+
     
     # Calculate date range
     start = datetime.strptime(start_date, '%Y-%m-%d')
@@ -164,6 +168,7 @@ def process_dates():
     )
     
     if weather_data:
+        weather_data["caretaker_comment"] = caretaker_comment  # ⬅️ Add this
         return jsonify(weather_data)
     else:
         return jsonify({"error": "Failed to retrieve weather data"}), 500
@@ -200,7 +205,7 @@ def predict_api():
     except Exception as e:
         return jsonify({"error": f"Failed to load models: {e}"}), 500
     
-    print("🔍 Columns before rename:", df.columns.tolist())
+    # print("🔍 Columns before rename:", df.columns.tolist())
 
     
         # ✅ Rename for consistency with transparency models
@@ -226,6 +231,31 @@ def predict_api():
         "Spring Temp (F)", "Dec Rain", "Calmar Rain"
     ], lags=[3,2,1], rolling_windows=[7])
 
+    # from numpy import tile
+    # from pandas import DataFrame, concat
+
+    # # Step 1: Get comment and encode
+    # sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+    # comment = data.get("caretaker_comment", "")
+    # embedding = sentence_model.encode(comment)
+
+    # print("🗣️ Caretaker Comment Received:", comment)
+    # print("🧠 Embedding (first 5 dims):", embedding[:5])  # just to not flood your logs
+
+
+    # # Step 2: Create an embedding matrix for all rows (same embedding repeated)
+    # embedding_matrix = tile(embedding, (len(df), 1))  # shape: (num_rows, embedding_dim)
+
+    # # Step 3: Convert to DataFrame
+    # embedding_df = DataFrame(
+    #     embedding_matrix,
+    #     columns=[f"text_emb_{j}" for j in range(len(embedding))]
+    # )
+
+    # # Step 4: Concatenate once
+    # df.reset_index(drop=True, inplace=True)
+    # df = concat([df, embedding_df], axis=1)
+
     results = []
 
     for i in range(len(history), len(df)):
@@ -239,12 +269,19 @@ def predict_api():
 
         row["AM Transparency"] = am_trans
         row["PM Transparency"] = pm_trans
+        
+        # print("AM model features:", am_model.feature_names_in_)
+        # print("PM model features:", pm_model.feature_names_in_)
+
+
+        # print("📦 Features used for prediction:")
+        # print(row[[col for col in row.columns if col.startswith("text_emb_")]].values[0][:5])  # first 5 dims
 
 
         survival = min(max(fish_model.predict(row)[0], 0.0), 100.0)
 
         risk = "High" if (
-            survival < 99.92 or am_trans < 30 and pm_trans < 30 or am_trans < 0 or pm_trans < 0
+            survival < 99.92 or am_trans < 30 or pm_trans < 30 or am_trans < 0 or pm_trans < 0
         ) else "Low"
 
 

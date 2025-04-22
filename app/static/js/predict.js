@@ -32,6 +32,8 @@ document.addEventListener("DOMContentLoaded", function () {
   predictButton.addEventListener("click", async function () {
     const selectedDates = dateRangePickerInput.value.split(" - ");
     const fishCount = document.getElementById("fish-count").value;
+    // const comment = document.getElementById("caretaker-comment").value;
+
 
     if (selectedDates.length !== 2 || !selectedDates[0] || !selectedDates[1]) {
       alert("Please select a valid start and end date.");
@@ -57,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
           start_date: startDate,
           end_date: endDate,
           fish_count: fishCount,
+          // caretaker_comment: comment,
         }),
       });
 
@@ -99,6 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Store for report generation
       reportHistory[entry.date] = {
         fishCount: fishCount,
+        // comment: document.getElementById("caretaker-comment").value || "N/A",
         temp: entry.temperature || "N/A",
         rainfall: entry.rainfall || "N/A",
         amTransparency: entry.am_transparency,
@@ -132,6 +136,7 @@ function downloadReport() {
   doc.setFontSize(12);
   doc.text(`Date: ${selectedDate}`, 20, 40);
   doc.text(`Fish Count: ${data.fishCount}`, 20, 50);
+  // doc.text(`Caretaker Comment: ${data.comment}`, 20, 130, { maxWidth: 170 });
   doc.text(`Forecasted Temp: ${data.temp}°F`, 20, 60);
   doc.text(`Rainfall: ${data.rainfall} in`, 20, 70);
   doc.text(`AM Transparency: ${data.amTransparency}`, 20, 80);
