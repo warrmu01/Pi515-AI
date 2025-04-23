@@ -147,7 +147,6 @@ def process_dates():
     start_date = data.get('start_date')
     end_date = data.get('end_date')
     fish_count = data.get('fish_count')
-    caretaker_comment = data.get('caretaker_comment', '')
 
     
     # Calculate date range
@@ -331,9 +330,19 @@ def predict_api():
 
         survival = min(max(fish_model.predict(row)[0], 0.0), 100.0)
 
-        risk = "High" if (
-            survival < 99.92 or am_trans < 30 or pm_trans < 30 or am_trans < 0 or pm_trans < 0
-        ) else "Low"
+        try:
+            fish_count = int(data.get("fish_count"))
+        except (ValueError, TypeError):
+            return jsonify({"error": "Invalid fish count"}), 400
+
+        deaths = (100 - survival) / 100 * fish_count
+
+        if survival == 100:
+            risk = "Low"
+        elif deaths >= 1000 or survival < 99.95 or am_trans < 30 or pm_trans < 30 or am_trans < 0 or pm_trans < 0:
+            risk = "High"
+        else:
+            risk = "Low"
 
 
         results.append({
