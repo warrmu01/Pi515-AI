@@ -7,6 +7,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.impute import KNNImputer
 from timeseries_utils import generate_time_series_features
+from sentence_transformers import SentenceTransformer
+
 
 
 def load_transparency__data():
@@ -44,15 +46,50 @@ def load_transparency__data():
     ts_columns = ["Dec Rain", "Calmar Rain"]
     df = generate_time_series_features(df, cols=ts_columns, lags=[3,2,1], rolling_windows=[7])
 
+    # ✅ Simulate caretaker comment
+    def generate_comment(row):
+        comments = []
+        if row["AM Transparency"] < 80:
+            comments.append("Water looked slightly murky today.")
+        else:
+            comments.append("Water appeared clear and calm.")
+        if row["Spring Temp (F)"] < 50:
+            comments.append("Tank felt colder than usual.")
+        elif row["Spring Temp (F)"] > 60:
+            comments.append("Tank felt warmer than usual.")
+        if row["Total Rain"] > 0.4:
+            comments.append("Rain might have affected clarity.")
+        return " ".join(comments)
+
+    df["Caretaker_Comment"] = df.apply(generate_comment, axis=1)
+
+    # ✅ NLP Embedding for text comments
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    df["comment_embedding"] = df["Caretaker_Comment"].apply(lambda x: model.encode(str(x)))
+    
+    # Split the embedding into multiple columns
+    embedding_df = pd.DataFrame(df["comment_embedding"].tolist(), index=df.index)
+    embedding_df.columns = [f"text_emb_{i}" for i in range(embedding_df.shape[1])]
+    
+    # Add embeddings to main dataframe
+    df = pd.concat([df.drop(columns=["comment_embedding"]), embedding_df], axis=1)
+
     return df
 
 # === Preprocessing Pipeline ===
 def create_transparency_pipeline():
     numerical_features = [
-        "Spring Temp (F)", "Max air temp", "Min air temp", "Dec Rain", "Calmar Rain",
-        "# fish", "Spring_Temp x Rain", "Max Air Temp x Rain",
-        "Total Rain", "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)", "Dec Rain (Lag 2)", "Calmar Rain (Lag 2)",
+        # Core features
+        "Spring Temp (F)", "Max air temp", "Min air temp",
+        "Dec Rain", "Calmar Rain",
+        "Spring_Temp x Rain", "Max Air Temp x Rain", "Total Rain",
+
+        # Lag features (match actual naming style)
         "Dec Rain (Lag 1)", "Calmar Rain (Lag 1)",
+        "Dec Rain (Lag 2)", "Calmar Rain (Lag 2)",
+        "Dec Rain (Lag 3)", "Calmar Rain (Lag 3)",
+
+        # Rolling features
         "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
     ]
 
@@ -94,6 +131,12 @@ def split_transparency_data(df, target_col, ratios):
         # Rolling averages
         "Dec Rain 7-day avg", "Calmar Rain 7-day avg"
     ]
+
+      # NLP embedding features
+    text_features = [col for col in df.columns if col.startswith("text_emb_")]
+
+        # Final full feature list
+    features = features + text_features
 
     df = df.dropna(subset=features + [target_col])
 

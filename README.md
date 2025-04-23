@@ -1,19 +1,46 @@
-# Pi515-AI
+# AquaVitals
+
+## Documentation
+
+### 🔍 Overview
+
+**AquaVitals** is a full-stack AI-powered tool that predicts weekly fish survival rates using environmental features such as rainfall, temperature, and water transparency. Built using a Flask backend and a lightweight HTML/JS frontend, it delivers real-time predictions through a user-friendly interface. The backend integrates weather APIs and XGBoost regression models for spring temperature, transparency, and survival.
+
+---
+
+### 🏗️ System Architecture
+
+- **Frontend**
+  - Built with HTML, CSS, and JavaScript
+  - Uses Litepicker for intuitive date range selection
+  - Collects user input (date range, fish count)
+  - Displays predictions in a readable table
+
+- **Backend (Flask)**
+  - Two primary endpoints:
+    - `POST /process_dates`: Fetches rainfall & temperature forecast from external APIs
+    - `POST /predict`: Chains predictions through XGBoost models to output:
+      - Spring temperature
+      - Morning & afternoon transparency
+      - Fish survival rate and risk level
+  - Models loaded via `.joblib` files from the `src/models/` directory
+
+---
 
 ## 📁 Project Structure.
+
 
 ```
 PI515-AI/
 ├── Data/
 │   └── Raw/
-│       ├── Harvest_Summary.xlsx
 │       ├── Main_Data.xlsx
 │       └── Main_Data_edited.xlsx
 │
 ├── Output/
 ├── Plots/
 │
-├── site/
+├── app/
 │   │
 │   ├── js/
 │   │   ├── predict.js
@@ -23,10 +50,15 @@ PI515-AI/
 │   │   ├── predict.css
 │   │   └── script.css
 │   │
+│   ├── models/
+│   │   └── am_transparency_model.joblib
+│   │   └── pm_transparency_model.joblib
+│   │   └── fish_survial_model.joblib
+│   │   └── spring_temp_model.joblib
+│   │
 │   ├── about.html
 │   ├── index.html
-│   ├── predict.html
-│   └── Transparency.html
+│   └── predict.html
 │ 
 ├── src/
 │   ├── __pycache__/
@@ -84,13 +116,14 @@ The system follows a sequential prediction flow:
 4. **Model 3: Predict Fish Survival Rate**
    - Uses input features + predicted Spring Temp + predicted Transparency  
 
+---
 
 
 ## 📌 Why Focus on RMSE and MAPE?
 
 In our evaluation, we emphasize **RMSE (Root Mean Squared Error)** and **MAPE (Mean Absolute Percentage Error)** rather than R² for the following reasons:
 
-- **Narrow Target Range**: The target variable — fish survival rate — lies in a very tight range (~99.9–100). This means that even small prediction errors can lead to very low or even negative R² values, making it a misleading metric in this context.
+- **Narrow Target Range**: The target variable — fish survival rate — lies in a very tight range (~99.2–100). This means that even small prediction errors can lead to very low or even negative R² values, making it a misleading metric in this context.
   
 - **RMSE** gives a good indication of the absolute prediction error magnitude in the same units as the target variable.
   
@@ -98,6 +131,7 @@ In our evaluation, we emphasize **RMSE (Root Mean Squared Error)** and **MAPE (M
 
 > ✅ A low RMSE and MAPE indicate that the predictions are accurate and consistent, even when R² may not reflect this due to the lack of target variance.
 
+---
 
 ## 📊 Model Performance Summary
 
@@ -166,4 +200,49 @@ In our evaluation, we emphasize **RMSE (Root Mean Squared Error)** and **MAPE (M
   - RMSE: **0.1934**
   - MAPE: **0.0004**
   - R²: **-0.1350**
+
+---
+
+
+# ⚙️ How to Run Locally
+
+1. Clone the repository
+   ```bash
+   git clone [https://github.com/yourusername/aquavitals.git]
+   cd aquavitals
+   ```
+
+2. Create and activate a virtual environment
+   
+   **macOS/Linux:**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   ```
+   
+   **Windows:**
+   ```bash
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
+
+3. Install dependencies
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Run the Flask app
+   ```bash
+   python app.py
+   ```
+
+5. Open the app in your browser
+   Go to:
+   ```
+   http://localhost:5000
+   ```
+
+✅ **Note:** Ensure all .joblib model files are present in the src/models/ directory before running the app.
+
+---
 
