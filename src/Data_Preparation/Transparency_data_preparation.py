@@ -46,31 +46,32 @@ def load_transparency__data():
     ts_columns = ["Dec Rain", "Calmar Rain"]
     df = generate_time_series_features(df, cols=ts_columns, lags=[3,2,1], rolling_windows=[7])
 
-    # ✅ Simulate caretaker comment 
-    def generate_comment(row):
-        comments = []
-        if row["AM Transparency"] < 80:
-            comments.append("Water looked slightly murky today.")
+    # ✅ Simulate natural language weather comment
+    def generate_weather_comment(row):
+        rain = row.get("Total Rain", 0)
+        temp = row.get("Spring Temp (F)", 0)
+
+        if rain > 0.5:
+            return "Heavy rain affected the tanks today."
+        elif rain > 0.2:
+            return "Moderate rain was observed today."
+        elif rain > 0:
+            return "Light rain occurred earlier in the day."
+        elif temp > 65:
+            return "It was a warm and dry day."
         else:
-            comments.append("Water appeared clear and calm.")
-        if row["Spring Temp (F)"] < 50:
-            comments.append("Tank felt colder than usual.")
-        elif row["Spring Temp (F)"] > 60:
-            comments.append("Tank felt warmer than usual.")
-        if row["Total Rain"] > 0.4:
-            comments.append("Rain might have affected clarity.")
-        return " ".join(comments)
+            return "The day was calm with no rainfall."
 
-    df["Caretaker_Comment"] = df.apply(generate_comment, axis=1)
+    df["Weather_Comment"] = df.apply(generate_weather_comment, axis=1)
 
-    # ✅ NLP Embedding for text comments
+    # ✅ NLP Embedding for weather-style comments
     model = SentenceTransformer('all-MiniLM-L6-v2')
-    df["comment_embedding"] = df["Caretaker_Comment"].apply(lambda x: model.encode(str(x)))
-    
-    # Split the embedding into multiple columns
+    df["comment_embedding"] = df["Weather_Comment"].apply(lambda x: model.encode(str(x)))
+
+    # Split embedding into multiple columns
     embedding_df = pd.DataFrame(df["comment_embedding"].tolist(), index=df.index)
     embedding_df.columns = [f"text_emb_{i}" for i in range(embedding_df.shape[1])]
-    
+
     # Add embeddings to main dataframe
     df = pd.concat([df.drop(columns=["comment_embedding"]), embedding_df], axis=1)
 
@@ -148,10 +149,6 @@ def split_transparency_data(df, target_col, ratios):
     dev_size = int(dev_ratio * total_len)
     test_size = int(test_ratio * total_len)
 
-    dev_ratio, test_ratio = ratios
-    total_len = len(X)
-    dev_size = int(dev_ratio * total_len)
-    test_size = int(test_ratio * total_len)
 
     X_train = X[:-(dev_size + test_size)]
     y_train = y[:-(dev_size + test_size)]
