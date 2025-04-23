@@ -84,3 +84,9 @@ body {
     width: 100%;
   }
   
+  #predictionTable tr.high-risk td {
+    background-color: #dd0707 !important;
+    color: white !important;           /* yellow text */
+    font-weight: bold;
+
+  }
