@@ -46,7 +46,7 @@ def load_transparency__data():
     ts_columns = ["Dec Rain", "Calmar Rain"]
     df = generate_time_series_features(df, cols=ts_columns, lags=[3,2,1], rolling_windows=[7])
 
-    # ✅ Simulate caretaker comment
+    # ✅ Simulate caretaker comment 
     def generate_comment(row):
         comments = []
         if row["AM Transparency"] < 80:
