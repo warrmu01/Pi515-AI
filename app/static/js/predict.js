@@ -32,7 +32,6 @@ document.addEventListener("DOMContentLoaded", function () {
   predictButton.addEventListener("click", async function () {
     const selectedDates = dateRangePickerInput.value.split(" - ");
     const fishCount = document.getElementById("fish-count").value;
-    // const comment = document.getElementById("caretaker-comment").value;
 
 
     if (selectedDates.length !== 2 || !selectedDates[0] || !selectedDates[1]) {
@@ -59,7 +58,6 @@ document.addEventListener("DOMContentLoaded", function () {
           start_date: startDate,
           end_date: endDate,
           fish_count: fishCount,
-          // caretaker_comment: comment,
         }),
       });
 
@@ -88,8 +86,15 @@ document.addEventListener("DOMContentLoaded", function () {
   function populatePredictionTable(data, fishCount) {
     predictionTableBody.innerHTML = "";
 
+        // Create arrays for charts
+    const dates = [];
+    const amValues = [];
+    const pmValues = [];
+
     data.forEach((entry) => {
       const row = document.createElement("tr");
+
+
       row.innerHTML = `
         <td>${entry.date}</td>
         <td>${entry.am_transparency.toFixed(2)}</td>
@@ -97,12 +102,14 @@ document.addEventListener("DOMContentLoaded", function () {
         <td>${entry.predicted_survival.toFixed(2)}</td>
         <td>${entry.risk_level}</td>
       `;
+      if (entry.risk_level === "High") {
+        row.classList.add("high-risk");
+      }
       predictionTableBody.appendChild(row);
 
       // Store for report generation
       reportHistory[entry.date] = {
         fishCount: fishCount,
-        // comment: document.getElementById("caretaker-comment").value || "N/A",
         temp: entry.temperature || "N/A",
         rainfall: entry.rainfall || "N/A",
         amTransparency: entry.am_transparency,
@@ -120,6 +127,158 @@ document.addEventListener("DOMContentLoaded", function () {
         option.textContent = entry.date;
         dropdown.appendChild(option);
       }
+            // Collect data for charts
+      dates.push(entry.date);
+      amValues.push(entry.am_transparency);
+      pmValues.push(entry.pm_transparency);
+    });
+        // Make sure predictionCard is visible first
+    predictionCard.style.display = "block";
+
+        // Add a small delay to ensure DOM elements are rendered
+    setTimeout(() => {
+          // Create charts
+          createTransparencyLineChart(dates, amValues, pmValues);
+          createTransparencyBarChart(dates, amValues, pmValues);
+    }, 100);
+  }
+   // Function to create line chart for transparency
+   function createTransparencyLineChart(dates, amValues, pmValues) {
+    const canvas = document.getElementById('transparencyLineChart');
+    const ctx = canvas.getContext('2d');
+
+    // Destroy previous chart if it exists
+    if (window.transparencyLineChart instanceof Chart) {
+      window.transparencyLineChart.destroy();
+    } else if (window.transparencyLineChart) {
+      // Clear the canvas if chart exists but isn't a Chart instance
+      canvas.width = canvas.width;
+    }
+
+    window.transparencyLineChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [
+          {
+            label: 'AM Transparency',
+            data: amValues,
+            borderColor: '#b2ebf2',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.3,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          },
+          {
+            label: 'PM Transparency',
+            data: pmValues,
+            backgroundColor: '#012169',
+            borderColor: '#012169',
+            tension: 0.3,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Transparency Trend Over Selected Period',
+            font: {
+              size: 16
+            }
+          },
+          legend: {
+            position: 'top',
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Transparency Value'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Date'
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Function to create bar chart comparing AM and PM values
+  function createTransparencyBarChart(dates, amValues, pmValues) {
+    const canvas = document.getElementById('transparencyBarChart');
+    const ctx = canvas.getContext('2d');
+
+    // Destroy previous chart if it exists
+    if (window.transparencyBarChart instanceof Chart) {
+      window.transparencyBarChart.destroy();
+    } else if (window.transparencyBarChart) {
+      // Clear the canvas if chart exists but isn't a Chart instance
+      canvas.width = canvas.width;
+    }
+
+    window.transparencyBarChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: dates,
+        datasets: [
+          {
+            label: 'AM Transparency',
+            data: amValues,
+            backgroundColor: '#b2ebf2',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          },
+          {
+            label: 'PM Transparency',
+            data: pmValues,
+            backgroundColor: '#012169',
+            borderColor: '#012169',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: 'AM vs PM Transparency Comparison',
+            font: {
+              size: 16
+            }
+          },
+          legend: {
+            position: 'top',
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Transparency Value'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Date'
+            }
+          }
+        }
+      }
     });
   }
 });
@@ -136,7 +295,6 @@ function downloadReport() {
   doc.setFontSize(12);
   doc.text(`Date: ${selectedDate}`, 20, 40);
   doc.text(`Fish Count: ${data.fishCount}`, 20, 50);
-  // doc.text(`Caretaker Comment: ${data.comment}`, 20, 130, { maxWidth: 170 });
   doc.text(`Forecasted Temp: ${data.temp}°F`, 20, 60);
   doc.text(`Rainfall: ${data.rainfall} in`, 20, 70);
   doc.text(`AM Transparency: ${data.amTransparency}`, 20, 80);
@@ -144,6 +302,14 @@ function downloadReport() {
   doc.text(`Survival Rate: ${data.survivalRate}%`, 20, 100);
   doc.text(`Risk Level: ${data.riskLevel}`, 20, 110);
   doc.text(`Suggested Action: ${data.suggestion}`, 20, 120, { maxWidth: 170 });
+
+    // Add chart to PDF
+  if (window.transparencyLineChart) {
+      const chartImg = window.transparencyLineChart.toBase64Image();
+      doc.addPage();
+      doc.text("Transparency Trend Chart", 20, 20);
+      doc.addImage(chartImg, 'PNG', 10, 30, 180, 100);
+    }
 
   doc.save(`AquaVitals-fishreport-${selectedDate}.pdf`);
 }
