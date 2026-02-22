@@ -4,7 +4,7 @@
 
 ### 🔍 Overview
 
-**AquaVitals** is a full-stack AI-powered tool that predicts weekly fish survival rates using environmental features such as rainfall, temperature, and water transparency. Built using a Flask backend and a lightweight HTML/JS frontend, it delivers real-time predictions through a user-friendly interface. The backend integrates weather APIs and XGBoost regression models for spring temperature, transparency, and survival.
+**AquaVitals** is a full-stack AI-powered tool that predicts weekly fish survival rates using environmental features such as rainfall, temperature, and weather comments. Built using a Flask backend and a lightweight HTML/JS frontend, it delivers real-time predictions through a user-friendly interface. The backend integrates weather APIs and XGBoost regression models for predicting spring temperature, transparency, and survival.
 
 ---
 
@@ -14,11 +14,11 @@
   - Built with HTML, CSS, and JavaScript
   - Uses Litepicker for intuitive date range selection
   - Collects user input (date range, fish count)
-  - Displays predictions in a readable table
+  - Displays predictions in a readable table and charts
 
 - **Backend (Flask)**
   - Two primary endpoints:
-    - `POST /process_dates`: Fetches rainfall & temperature forecast from external APIs
+    - `POST /process_dates`: Fetches rainfall, temperature and weather comments forecast from external APIs
     - `POST /predict`: Chains predictions through XGBoost models to output:
       - Spring temperature
       - Morning & afternoon transparency
@@ -37,9 +37,6 @@ PI515-AI/
 │       ├── Main_Data.xlsx
 │       └── Main_Data_edited.xlsx
 │
-├── Output/
-├── Plots/
-│
 ├── app/
 │   │
 │   ├── js/
@@ -48,7 +45,8 @@ PI515-AI/
 │   │
 │   ├── css/
 │   │   ├── predict.css
-│   │   └── script.css
+│   │   ├── about.css
+│   │   └── style.css
 │   │
 │   ├── models/
 │   │   └── am_transparency_model.joblib
@@ -56,9 +54,12 @@ PI515-AI/
 │   │   └── fish_survial_model.joblib
 │   │   └── spring_temp_model.joblib
 │   │
-│   ├── about.html
-│   ├── index.html
-│   └── predict.html
+│   │
+│   ├── templates/
+│   │   └── about.html
+│   │   └── index.html
+│   │   └── predict.html
+│   
 │ 
 ├── src/
 │   ├── __pycache__/
@@ -66,8 +67,8 @@ PI515-AI/
 │   ├── Data_Preparation/
 │   │   ├── fish_survival_data_preparation.ipynb
 │   │   ├── fish_survival_data_preparation.py
-│   │   ├── Spring_temp_data_preparation.py
 │   │   ├── Spring_temp_data_preparation.ipynb
+│   │   ├── Spring_temp_data_preparation.py
 │   │   ├── Transparency_data_preparation.ipynb
 │   │   └── Transparency_data_preparation.py
 │   │
@@ -89,9 +90,11 @@ PI515-AI/
 │   │
 │   ├── chained_model.ipynb
 │   ├── DNN.ipynb
+│   ├── timeseries_utils.py
 │   └── EDA.ipynb
 │
 ├── README.md
+├── requirements.txt
 ```
 
 ## 🔗 Chained Model Architecture
